@@ -67,8 +67,8 @@ export class DefaultBillingAccountProfileStateService implements BillingAccountP
   ): Promise<void> {
     await this.stateProvider.getUser(userId, BILLING_ACCOUNT_PROFILE_KEY_DEFINITION).update((_) => {
       return {
-        hasPremiumPersonally: hasPremiumPersonally,
-        hasPremiumFromAnyOrganization: hasPremiumFromAnyOrganization,
+        hasPremiumPersonally: true,
+        hasPremiumFromAnyOrganization: true,
       };
     });
   }
