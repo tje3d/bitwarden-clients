@@ -577,6 +577,41 @@ jobs:
           upload_translations: false
 
 
+  github-release:
+    name: GitHub Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    needs:
+      - setup
+      - build
+    permissions:
+      contents: write
+    steps:
+      - name: Download Chrome artifact
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: bit-dist-chrome-MV3-${{ needs.setup.outputs.adj_build_number }}.zip
+          path: release-artifacts
+
+      - name: Download Firefox artifact
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: bit-dist-firefox-${{ needs.setup.outputs.adj_build_number }}.zip
+          path: release-artifacts
+
+      - name: Create Release
+        uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
+        with:
+          artifacts: "release-artifacts/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: commit-${{ needs.setup.outputs.adj_build_number }}
+          name: "Build ${{ needs.setup.outputs.adj_build_number }}"
+          body: "Automated build for commit ${{ github.sha }}"
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+
+
   check-failures:
     name: Check for failures
     if: always()
@@ -591,6 +626,7 @@ jobs:
       - build
       - build-safari
       - crowdin-push
+      - github-release
     steps:
       - name: Check if any job failed
         if: |
